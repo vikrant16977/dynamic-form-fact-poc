@@ -1,20 +1,51 @@
 // src/context/FormContext.js
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
+import { v4 as uuidv4 } from 'uuid';
 
 export const FormContext = createContext();
 
 export const FormProvider = ({ children }) => {
-  const [formFields, setFormFields] = useState([]);
+  const [forms, setForms] = useState([]);
+  const [activeFormId, setActiveFormId] = useState(null);
 
-  const addField = (field) => setFormFields([...formFields, field]);
-  const updateField = (index, newField) => {
-    const updated = [...formFields];
-    updated[index] = newField;
-    setFormFields(updated);
+  // Load from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("forms");
+    if (stored) {
+      setForms(JSON.parse(stored));
+    }
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem("forms", JSON.stringify(forms));
+  }, [forms]);
+
+  const createNewForm = (title) => {
+    const newForm = { id: uuidv4(), title, fields: [] };
+    setForms([...forms, newForm]);
+    setActiveFormId(newForm.id);
   };
 
+  const addFieldToForm = (formId, field) => {
+    setForms(forms.map(form =>
+      form.id === formId
+        ? { ...form, fields: [...form.fields, field] }
+        : form
+    ));
+  };
+
+  const getActiveForm = () => forms.find(form => form.id === activeFormId);
+
   return (
-    <FormContext.Provider value={{ formFields, addField, updateField, setFormFields }}>
+    <FormContext.Provider value={{
+      forms,
+      activeFormId,
+      createNewForm,
+      addFieldToForm,
+      setActiveFormId,
+      getActiveForm
+    }}>
       {children}
     </FormContext.Provider>
   );
