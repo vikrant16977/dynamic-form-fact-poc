@@ -1,51 +1,60 @@
-// src/context/FormContext.js
 import React, { createContext, useState, useEffect } from "react";
-import { v4 as uuidv4 } from 'uuid';
 
 export const FormContext = createContext();
 
 export const FormProvider = ({ children }) => {
   const [forms, setForms] = useState([]);
-  const [activeFormId, setActiveFormId] = useState(null);
+  const [selectedFormId, setSelectedFormId] = useState(null);
 
-  // Load from localStorage
+  // Load from localStorage initially
   useEffect(() => {
-    const stored = localStorage.getItem("forms");
-    if (stored) {
-      setForms(JSON.parse(stored));
+    const storedForms = localStorage.getItem("forms");
+    if (storedForms) {
+      setForms(JSON.parse(storedForms));
     }
   }, []);
 
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem("forms", JSON.stringify(forms));
-  }, [forms]);
 
-  const createNewForm = (title) => {
-    const newForm = { id: uuidv4(), title, fields: [] };
-    setForms([...forms, newForm]);
-    setActiveFormId(newForm.id);
+  const addNewForm = (formTitle) => {
+    const newForm = {
+      id: Date.now(), // unique id
+      title: formTitle,
+      sections: [],
+    };
+    setForms((prev) => [...prev, newForm]);
+    setSelectedFormId(newForm.id);
   };
 
-  const addFieldToForm = (formId, field) => {
-    setForms(forms.map(form =>
-      form.id === formId
-        ? { ...form, fields: [...form.fields, field] }
-        : form
-    ));
+  const addSectionToForm = (formId, section) => {
+    setForms((prevForms) =>
+      prevForms.map((form) =>
+        form.id === formId
+          ? { ...form, sections: [...form.sections, section] }
+          : form
+      )
+    );
   };
 
-  const getActiveForm = () => forms.find(form => form.id === activeFormId);
+  const updateSelectedFormId = (id) => {
+    setSelectedFormId(id);
+  };
+
+  const getSelectedForm = () => {
+    return forms.find((form) => form.id === selectedFormId);
+  };
 
   return (
-    <FormContext.Provider value={{
-      forms,
-      activeFormId,
-      createNewForm,
-      addFieldToForm,
-      setActiveFormId,
-      getActiveForm
-    }}>
+    <FormContext.Provider
+      value={{
+        forms,
+        selectedFormId,
+        addNewForm,
+        addSectionToForm,
+        updateSelectedFormId,
+        getSelectedForm,
+        setForms
+      }}
+    >
       {children}
     </FormContext.Provider>
   );
