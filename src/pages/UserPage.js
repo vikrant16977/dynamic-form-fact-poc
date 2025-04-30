@@ -1,48 +1,46 @@
+// src/pages/UserPage.js
 import React, { useContext, useState } from "react";
 import { FormContext } from "../context/FormContext";
 import {
   Container,
   Header,
-  Segment,
   Form,
-  Button,
+  Segment,
   Dropdown,
+  Button,
+  Message,
+  Divider,
+  Grid,
 } from "semantic-ui-react";
 import { Link } from "react-router-dom";
+import HeaderBar from "../components/HeaderBar";
+
 const UserPage = () => {
-  const { forms } = useContext(FormContext);
+  const { forms, selectedFormId, updateSelectedFormId, getSelectedForm } =
+    useContext(FormContext);
 
-  const [selectedFormId, setSelectedFormId] = useState("");
-  const [formData, setFormData] = useState({});
+  const [responses, setResponses] = useState({});
+  const [submitted, setSubmitted] = useState(false);
 
-  const selectedForm = forms.find((form) => form.id === selectedFormId);
+  const selectedForm = getSelectedForm();
 
-  const handleInputChange = (sectionIndex, questionIndex, value) => {
-    setFormData((prev) => ({
+  const handleChange = (sectionId, questionId, value) => {
+    setResponses((prev) => ({
       ...prev,
-      [`${sectionIndex}-${questionIndex}`]: value,
+      [sectionId]: { ...prev[sectionId], [questionId]: value },
     }));
   };
 
-  const handleSubmit = () => {
-    console.log("Submitted Data:", formData);
-    alert("Form submitted successfully!");
-    setFormData({});
-    setSelectedFormId("");
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Form submitted:", responses);
+    setSubmitted(true);
   };
 
-  return (
-    <Container style={{ marginTop: "2rem" }}>
-      <Button
-        as={Link}
-        to="/admin"
-        color="blue"
-        icon="arrow left"
-        content="Back to Admin"
-      />
-      <Header as="h1" textAlign="center" dividing>
-        User - Fill and Submit Forms
-      </Header>
+  return (<>
+    <HeaderBar ></HeaderBar>
+    <Container style={{ marginTop: "15rem" }}>
+      
 
       {/* Form Selection */}
       {forms.length > 0 ? (
@@ -50,185 +48,186 @@ const UserPage = () => {
           placeholder="Select a form"
           fluid
           selection
-          options={forms.map((form) => ({
-            key: form.id,
-            text: form.title,
-            value: form.id,
+          options={forms.map((f) => ({
+            key: f.id,
+            text: f.title,
+            value: f.id,
           }))}
           value={selectedFormId}
-          onChange={(e, { value }) => setSelectedFormId(value)}
+          onChange={(_, { value }) => {
+            updateSelectedFormId(value);
+            setResponses({});
+            setSubmitted(false);
+          }}
           style={{ marginBottom: "2rem" }}
         />
       ) : (
-        <Header as="h3" textAlign="center">
-          No forms available. Please ask admin to create one.
-        </Header>
+        <Message
+          warning
+          content="No forms available. Please ask admin to create one."
+        />
       )}
 
       {/* Render Selected Form */}
       {selectedForm && (
         <Form onSubmit={handleSubmit}>
-          {selectedForm.sections.map((section, sectionIndex) => (
-            <Segment
-              key={sectionIndex}
-              style={{
-                padding: "2rem",
-                border: "1px solid #ccc",
-                marginBottom: "2rem",
-              }}
-            >
-              <Header as="h3" color="teal">
+          {selectedForm.sections.map((section) => (
+            <Segment key={section.id} style={{ background: "#f7f7f7" }}>
+              <Header as="h3" color="blue">
                 {section.sectionTitle}
               </Header>
 
-              {section.questions.map((question, questionIndex) => {
-                const key = `${sectionIndex}-${questionIndex}`;
-                const value = formData[key] || "";
+              <Grid columns={3} stackable>
+                {section.questions.map((q) => {
+                  const sectionResp = responses[section.id] || {};
+                  const val = sectionResp[q.id] ?? "";
 
-                switch (question.type) {
-                  case "text":
-                    return (
-                      <Form.Input
-                        key={key}
-                        label={question.label}
-                        value={value}
-                        onChange={(e) =>
-                          handleInputChange(
-                            sectionIndex,
-                            questionIndex,
-                            e.target.value
-                          )
-                        }
-                      />
-                    );
-                  case "textarea":
-                    return (
-                      <Form.TextArea
-                        key={key}
-                        label={question.label}
-                        value={value}
-                        onChange={(e) =>
-                          handleInputChange(
-                            sectionIndex,
-                            questionIndex,
-                            e.target.value
-                          )
-                        }
-                      />
-                    );
-                  case "radio":
-                    return (
-                      <Form.Group grouped key={key}>
-                        <label>{question.label}</label>
-                        {question.options.map((opt, idx) => (
-                          <Form.Radio
-                            key={idx}
-                            label={opt}
-                            value={opt}
-                            checked={value === opt}
-                            onChange={(e, { value }) =>
-                              handleInputChange(
-                                sectionIndex,
-                                questionIndex,
-                                value
-                              )
+                  return (
+                    <Grid.Column key={q.id}>
+                      <Form.Field required={q.required}>
+                        <label>{q.label}</label>
+
+                        {q.type === "text" && (
+                          <Form.Input
+                            value={val}
+                            onChange={(e) =>
+                              handleChange(section.id, q.id, e.target.value)
                             }
                           />
-                        ))}
-                      </Form.Group>
-                    );
-                  case "checkbox":
-                    return (
-                      <Form.Checkbox
-                        key={key}
-                        label={question.label}
-                        checked={value === true}
-                        onChange={(e, { checked }) =>
-                          handleInputChange(
-                            sectionIndex,
-                            questionIndex,
-                            checked
-                          )
-                        }
-                      />
-                    );
-                  case "dropdown":
-                    return (
-                      <Form.Select
-                        key={key}
-                        label={question.label}
-                        options={question.options.map((opt) => ({
-                          key: opt,
-                          text: opt,
-                          value: opt,
-                        }))}
-                        value={value}
-                        onChange={(e, { value }) =>
-                          handleInputChange(sectionIndex, questionIndex, value)
-                        }
-                      />
-                    );
-                  case "number":
-                    return (
-                      <Form.Input
-                        key={key}
-                        type="number"
-                        label={question.label}
-                        value={value}
-                        onChange={(e) =>
-                          handleInputChange(
-                            sectionIndex,
-                            questionIndex,
-                            e.target.value
-                          )
-                        }
-                      />
-                    );
-                  case "email":
-                    return (
-                      <Form.Input
-                        key={key}
-                        type="email"
-                        label={question.label}
-                        value={value}
-                        onChange={(e) =>
-                          handleInputChange(
-                            sectionIndex,
-                            questionIndex,
-                            e.target.value
-                          )
-                        }
-                      />
-                    );
-                  case "date":
-                    return (
-                      <Form.Input
-                        key={key}
-                        type="date"
-                        label={question.label}
-                        value={value}
-                        onChange={(e) =>
-                          handleInputChange(
-                            sectionIndex,
-                            questionIndex,
-                            e.target.value
-                          )
-                        }
-                      />
-                    );
-                  default:
-                    return null;
-                }
-              })}
+                        )}
+
+                        {q.type === "textarea" && (
+                          <Form.TextArea
+                            value={val}
+                            onChange={(e) =>
+                              handleChange(section.id, q.id, e.target.value)
+                            }
+                          />
+                        )}
+
+                        {q.type === "radio" && (
+                          <Form.Group inline>
+                            {q.options.map((opt, i) => (
+                              <Form.Radio
+                                key={i}
+                                label={opt}
+                                name={`${section.id}-${q.id}`}
+                                value={opt}
+                                checked={val === opt}
+                                onChange={() =>
+                                  handleChange(section.id, q.id, opt)
+                                }
+                              />
+                            ))}
+                          </Form.Group>
+                        )}
+
+                        {q.type === "checkbox" && (
+                          <Form.Group inline>
+                            {q.options.map((opt, i) => {
+                              const arr = Array.isArray(val) ? val : [];
+                              return (
+                                <Form.Checkbox
+                                  key={i}
+                                  label={opt}
+                                  checked={arr.includes(opt)}
+                                  onChange={(_, { checked }) => {
+                                    const next = checked
+                                      ? [...arr, opt]
+                                      : arr.filter((x) => x !== opt);
+                                    handleChange(section.id, q.id, next);
+                                  }}
+                                />
+                              );
+                            })}
+                          </Form.Group>
+                        )}
+
+                        {q.type === "dropdown" && (
+                          <Dropdown
+                            fluid
+                            selection
+                            options={q.options.map((opt, idx) => ({
+                              key: idx,
+                              text: opt,
+                              value: opt,
+                            }))}
+                            value={val}
+                            onChange={(_, { value }) =>
+                              handleChange(section.id, q.id, value)
+                            }
+                          />
+                        )}
+
+                        {q.type === "number" && (
+                          <Form.Input
+                            type="number"
+                            value={val}
+                            onChange={(e) =>
+                              handleChange(section.id, q.id, e.target.value)
+                            }
+                          />
+                        )}
+
+                        {q.type === "email" && (
+                          <Form.Input
+                            type="email"
+                            value={val}
+                            onChange={(e) =>
+                              handleChange(section.id, q.id, e.target.value)
+                            }
+                          />
+                        )}
+
+                        {q.type === "date" && (
+                          <Form.Input
+                            type="date"
+                            value={val}
+                            onChange={(e) =>
+                              handleChange(section.id, q.id, e.target.value)
+                            }
+                          />
+                        )}
+
+                        {q.type === "time" && (
+                          <Form.Input
+                            type="time"
+                            value={val}
+                            onChange={(e) =>
+                              handleChange(section.id, q.id, e.target.value)
+                            }
+                          />
+                        )}
+                      </Form.Field>
+                    </Grid.Column>
+                  );
+                })}
+              </Grid>
             </Segment>
           ))}
 
-          <Button color="green" type="submit" size="large" fluid>
-            Submit Form
+          <Divider />
+          <Button color="green" type="submit" fluid>
+            Submit
           </Button>
         </Form>
       )}
+
+      {submitted && (
+        <Message
+          success
+          header="Form submitted!"
+          content="Your responses have been recorded."
+          style={{ marginTop: "1rem" }}
+        />
+      )}
+
+      <Button as={Link} to="/admin" color="blue" style={{ marginTop: "2rem" }}>
+        ← Back to Admin
+      </Button>
     </Container>
+    </>
+    
   );
 };
 
