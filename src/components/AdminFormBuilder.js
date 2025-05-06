@@ -4,9 +4,12 @@ import {
   Header,
   Form,
   Button,
-  Dropdown
+  Dropdown,
+  Grid,
 } from "semantic-ui-react";
 import { FormContext } from "../context/FormContext";
+import FormPreview from "./FormPreview";
+import FieldPropertyModal from "./FieldPropertyModal";
 
 const questionTypeOptions = [
   { key: "text", text: "Text Field", value: "text" },
@@ -16,120 +19,146 @@ const questionTypeOptions = [
   { key: "dropdown", text: "Dropdown", value: "dropdown" },
   { key: "number", text: "Number Field", value: "number" },
   { key: "email", text: "Email Field", value: "email" },
-  { key: "date", text: "Date Picker", value: "date" }
+  { key: "date", text: "Date Picker", value: "date" },
 ];
 
-const AdminFormBuilder = ({ selectedForm, forms, setForms, selectedFormId }) => {
+const AdminFormBuilder = ({
+  selectedForm,
+  forms,
+  setForms,
+  selectedFormId,
+}) => {
   const [newSectionTitle, setNewSectionTitle] = useState("");
-  const [questionLabel, setQuestionLabel] = useState("");
-  const [questionType, setQuestionType] = useState("text");
-  const [questionOptions, setQuestionOptions] = useState("");
+  const [activeSectionId, setActiveSectionId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedField, setSelectedField] = useState(null);
+  const [selectedSectionId, setSelectedSectionId] = useState(null);
 
   const { addSectionToForm } = useContext(FormContext);
+  const handleQuestionClick = (sectionId, questionId) => {
+    const section = selectedForm.sections.find((s) => s.id === sectionId);
+    const question = section.questions.find((q) => q.id === questionId);
+    setSelectedField(question);
+    setSelectedSectionId(sectionId);
+    setModalOpen(true);
+  };
 
+  const handleModalSave = (updatedField) => {
+    const updatedForms = forms.map((form) => {
+      if (form.id === selectedFormId) {
+        const updatedSections = form.sections.map((section) => {
+          if (section.id === selectedSectionId) {
+            const updatedQuestions = section.questions.map((q) =>
+              q.id === updatedField.id ? updatedField : q
+            );
+            return { ...section, questions: updatedQuestions };
+          }
+          return section;
+        });
+        return { ...form, sections: updatedSections };
+      }
+      return form;
+    });
+
+    setForms(updatedForms);
+    localStorage.setItem("forms", JSON.stringify(updatedForms));
+    setModalOpen(false);
+  };
   const handleAddSection = () => {
     if (newSectionTitle.trim() !== "") {
       const newSection = {
         id: Date.now(),
         sectionTitle: newSectionTitle.trim(),
-        questions: []
+        questions: [],
       };
       addSectionToForm(selectedFormId, newSection);
       setNewSectionTitle("");
     }
   };
 
-  const handleAddQuestion = (sectionId) => {
-    if (questionLabel.trim() !== "") {
-      const updatedForms = forms.map((form) => {
-        if (form.id === selectedFormId) {
-          const updatedSections = form.sections.map((section) => {
-            if (section.id === sectionId) {
-              const newQuestion = {
-                id: Date.now(),
-                label: questionLabel.trim(),
-                type: questionType,
-                options:
-                  questionType === "radio" || questionType === "dropdown"
-                    ? questionOptions.split(",").map((opt) => opt.trim())
-                    : []
-              };
-              return {
-                ...section,
-                questions: [...section.questions, newQuestion]
-              };
-            }
-            return section;
-          });
-          return { ...form, sections: updatedSections };
-        }
-        return form;
-      });
-      setForms(updatedForms);
-      localStorage.setItem("forms", JSON.stringify(updatedForms));
-      setQuestionLabel("");
-      setQuestionType("text");
-      setQuestionOptions("");
+  const handleAddFieldToSection = (type) => {
+    if (!activeSectionId) {
+      alert("Please select a section to add the field.");
+      return;
     }
+
+    const updatedForms = forms.map((form) => {
+      if (form.id === selectedFormId) {
+        const updatedSections = form.sections.map((section) => {
+          if (section.id === activeSectionId) {
+            const newQuestion = {
+              id: Date.now(),
+              label: `${type} field`,
+              type,
+              options:
+                type === "radio" || type === "dropdown"
+                  ? ["Option 1", "Option 2"]
+                  : [],
+            };
+            return {
+              ...section,
+              questions: [...section.questions, newQuestion],
+            };
+          }
+          return section;
+        });
+        return { ...form, sections: updatedSections };
+      }
+      return form;
+    });
+
+    setForms(updatedForms);
+    localStorage.setItem("forms", JSON.stringify(updatedForms));
   };
 
   return (
     <>
-      {selectedForm && (
-        <Segment>
-          <Header as="h3">Add Section to {selectedForm.title}</Header>
-          <Form>
-            <Form.Input
-              placeholder="Enter section title"
-              value={newSectionTitle}
-              onChange={(e) => setNewSectionTitle(e.target.value)}
-            />
-            <Button color="blue" onClick={handleAddSection}>
-              Add Section
-            </Button>
-          </Form>
-        </Segment>
-      )}
+      <Grid>
+        <Grid.Column width={4}>
+          <Segment>
+            <Header as="h4">Add Section</Header>
+            <Form>
+              <Form.Input
+                placeholder="Section Title"
+                value={newSectionTitle}
+                onChange={(e) => setNewSectionTitle(e.target.value)}
+              />
+              <Button color="blue" onClick={handleAddSection} fluid>
+                Add Section
+              </Button>
+            </Form>
+          </Segment>
+          <Segment>
+            <Header as="h4">Add Field</Header>
+            {questionTypeOptions.map((opt) => (
+              <Button
+                key={opt.key}
+                onClick={() => handleAddFieldToSection(opt.value)}
+                style={{ margin: "0.25rem 0" }}
+                fluid
+              >
+                {opt.text}
+              </Button>
+            ))}
+          </Segment>
+        </Grid.Column>
 
-      {selectedForm && selectedForm.sections.length > 0 && (
-        <Segment>
-          <Header as="h3">Add Question</Header>
-          {selectedForm.sections.map((section) => (
-            <Segment key={section.id} style={{ backgroundColor: "#f9f9f9" }}>
-              <Header as="h4" color="teal">
-                Section: {section.sectionTitle}
-              </Header>
-              <Form>
-                <Form.Input
-                  placeholder="Question label"
-                  value={questionLabel}
-                  onChange={(e) => setQuestionLabel(e.target.value)}
-                />
-                <Form.Select
-                  placeholder="Select question type"
-                  options={questionTypeOptions}
-                  value={questionType}
-                  onChange={(e, { value }) => setQuestionType(value)}
-                />
-                {(questionType === "radio" || questionType === "dropdown") && (
-                  <Form.Input
-                    placeholder="Enter options comma separated"
-                    value={questionOptions}
-                    onChange={(e) => setQuestionOptions(e.target.value)}
-                  />
-                )}
-                <Button
-                  color="purple"
-                  onClick={() => handleAddQuestion(section.id)}
-                  style={{ marginTop: "1rem" }}
-                >
-                  Add Question
-                </Button>
-              </Form>
-            </Segment>
-          ))}
-        </Segment>
-      )}
+        <Grid.Column width={"12"}>
+          <Header as="h3">Live Preview</Header>
+          <FormPreview
+            form={selectedForm}
+            setActiveSectionId={setActiveSectionId}
+            activeSectionId={activeSectionId}
+            onQuestionClick={handleQuestionClick}
+          />
+        </Grid.Column>
+      </Grid>
+      <FieldPropertyModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleModalSave}
+        field={selectedField}
+      />
     </>
   );
 };
