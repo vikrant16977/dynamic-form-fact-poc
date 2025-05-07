@@ -16,7 +16,7 @@ const FormPreview = ({ form, setActiveSectionId, activeSectionId, onQuestionClic
               activeSectionId === section.id ? "#e0f7fa" : "#f9f9f9",
             border:
               activeSectionId === section.id
-                ? "2px solid #21ba45"
+                ? "2px solid #d6d6d6"
                 : "1px solid #ccc",
             cursor: "pointer",
           }}

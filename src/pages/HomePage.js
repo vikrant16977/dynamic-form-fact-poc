@@ -80,14 +80,24 @@ const HomePage = () => {
               </Button>
             </Grid.Column>
             <Grid.Column>
-              <Button
+             {selectedForm? <Button
                 fluid
                 style={{ backgroundColor: "#11329E", color: "white" }}
                 onClick={selectedForm ? handleEdit : handleCreate}
                 disabled={!formName && !selectedForm}
-              >
-                Create / Edit
-              </Button>
+              > 
+               Edit
+              </Button>:
+               <Button
+               fluid
+               style={{ backgroundColor: "#11329E", color: "white" }}
+               onClick={selectedForm ? handleEdit : handleCreate}
+               disabled={!formName && !selectedForm}
+             > 
+               Create
+             </Button>
+
+}
             </Grid.Column>
           </Grid>
         </Segment>

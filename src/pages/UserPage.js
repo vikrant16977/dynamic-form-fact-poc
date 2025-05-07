@@ -37,197 +37,211 @@ const UserPage = () => {
     setSubmitted(true);
   };
 
-  return (<>
-    <HeaderBar ></HeaderBar>
-    <Container style={{ marginTop: "15rem" }}>
-      
+  return (
+    <>
+      <HeaderBar></HeaderBar>
+      <Container style={{ marginTop: "5rem" }}>
+        <Header as="h3" style={{ textDecoration: "underline" }}>
+          Select the Form to Submit
+        </Header>
 
-      {/* Form Selection */}
-      {forms.length > 0 ? (
-        <Dropdown
-          placeholder="Select a form"
-          fluid
-          selection
-          options={forms.map((f) => ({
-            key: f.id,
-            text: f.title,
-            value: f.id,
-          }))}
-          value={selectedFormId}
-          onChange={(_, { value }) => {
-            updateSelectedFormId(value);
-            setResponses({});
-            setSubmitted(false);
-          }}
-          style={{ marginBottom: "2rem" }}
-        />
-      ) : (
-        <Message
-          warning
-          content="No forms available. Please ask admin to create one."
-        />
-      )}
+        {/* Form Selection */}
+        {forms.length > 0 ? (
+          <Dropdown
+            placeholder="Select a form"
+            fluid
+            selection
+            options={forms.map((f) => ({
+              key: f.id,
+              text: f.title,
+              value: f.id,
+            }))}
+            value={selectedFormId}
+            onChange={(_, { value }) => {
+              updateSelectedFormId(value);
+              setResponses({});
+              setSubmitted(false);
+            }}
+            style={{ marginBottom: "2rem" }}
+          />
+        ) : (
+          <Message
+            warning
+            content="No forms available. Please ask admin to create one."
+          />
+        )}
 
-      {/* Render Selected Form */}
-      {selectedForm && (
-        <Form onSubmit={handleSubmit}>
-          {selectedForm.sections.map((section) => (
-            <Segment key={section.id} style={{ background: "#f7f7f7" }}>
-              <Header as="h3" color="blue">
-                {section.sectionTitle}
-              </Header>
+        {/* Render Selected Form */}
+        {selectedForm && (
+          <Form onSubmit={handleSubmit}>
+            {selectedForm.sections.map((section) => (
+              <Segment key={section.id} style={{ background: "#f7f7f7" }}>
+                <Header as="h3" color="blue">
+                  {section.sectionTitle}
+                </Header>
 
-              <Grid columns={3} stackable>
-                {section.questions.map((q) => {
-                  const sectionResp = responses[section.id] || {};
-                  const val = sectionResp[q.id] ?? "";
+                <Grid columns={3} stackable>
+                  {section.questions.map((q) => {
+                    const sectionResp = responses[section.id] || {};
+                    const val = sectionResp[q.id] ?? "";
 
-                  return (
-                    <Grid.Column key={q.id}>
-                      <Form.Field required={q.required}>
-                        <label>{q.label}</label>
+                    return (
+                      <Grid.Column key={q.id}>
+                        <Form.Field required={q.required}>
+                          <label>{q.label}</label>
 
-                        {q.type === "text" && (
-                          <Form.Input
-                            value={val}
-                            onChange={(e) =>
-                              handleChange(section.id, q.id, e.target.value)
-                            }
-                          />
-                        )}
+                          {q.type === "text" && (
+                            <Form.Input
+                              value={val}
+                              onChange={(e) =>
+                                handleChange(section.id, q.id, e.target.value)
+                              }
+                            />
+                          )}
 
-                        {q.type === "textarea" && (
-                          <Form.TextArea
-                            value={val}
-                            onChange={(e) =>
-                              handleChange(section.id, q.id, e.target.value)
-                            }
-                          />
-                        )}
+                          {q.type === "textarea" && (
+                            <Form.TextArea
+                              value={val}
+                              onChange={(e) =>
+                                handleChange(section.id, q.id, e.target.value)
+                              }
+                            />
+                          )}
 
-                        {q.type === "radio" && (
-                          <Form.Group inline>
-                            {q.options.map((opt, i) => (
-                              <Form.Radio
-                                key={i}
-                                label={opt}
-                                name={`${section.id}-${q.id}`}
-                                value={opt}
-                                checked={val === opt}
-                                onChange={() =>
-                                  handleChange(section.id, q.id, opt)
-                                }
-                              />
-                            ))}
-                          </Form.Group>
-                        )}
-
-                        {q.type === "checkbox" && (
-                          <Form.Group inline>
-                            {q.options.map((opt, i) => {
-                              const arr = Array.isArray(val) ? val : [];
-                              return (
-                                <Form.Checkbox
+                          {q.type === "radio" && (
+                            <Form.Group inline>
+                              {q.options.map((opt, i) => (
+                                <Form.Radio
                                   key={i}
                                   label={opt}
-                                  checked={arr.includes(opt)}
-                                  onChange={(_, { checked }) => {
-                                    const next = checked
-                                      ? [...arr, opt]
-                                      : arr.filter((x) => x !== opt);
-                                    handleChange(section.id, q.id, next);
-                                  }}
+                                  name={`${section.id}-${q.id}`}
+                                  value={opt}
+                                  checked={val === opt}
+                                  onChange={() =>
+                                    handleChange(section.id, q.id, opt)
+                                  }
                                 />
-                              );
-                            })}
-                          </Form.Group>
-                        )}
+                              ))}
+                            </Form.Group>
+                          )}
 
-                        {q.type === "dropdown" && (
-                          <Dropdown
-                            fluid
-                            selection
-                            options={q.options.map((opt, idx) => ({
-                              key: idx,
-                              text: opt,
-                              value: opt,
-                            }))}
-                            value={val}
-                            onChange={(_, { value }) =>
-                              handleChange(section.id, q.id, value)
-                            }
-                          />
-                        )}
+                          {q.type === "checkbox" && (
+                            <Form.Group inline>
+                              {q.options.map((opt, i) => {
+                                const arr = Array.isArray(val) ? val : [];
+                                return (
+                                  <Form.Checkbox
+                                    key={i}
+                                    label={opt}
+                                    checked={arr.includes(opt)}
+                                    onChange={(_, { checked }) => {
+                                      const next = checked
+                                        ? [...arr, opt]
+                                        : arr.filter((x) => x !== opt);
+                                      handleChange(section.id, q.id, next);
+                                    }}
+                                  />
+                                );
+                              })}
+                            </Form.Group>
+                          )}
 
-                        {q.type === "number" && (
-                          <Form.Input
-                            type="number"
-                            value={val}
-                            onChange={(e) =>
-                              handleChange(section.id, q.id, e.target.value)
-                            }
-                          />
-                        )}
+                          {q.type === "dropdown" && (
+                            <Dropdown
+                              fluid
+                              selection
+                              options={q.options.map((opt, idx) => ({
+                                key: idx,
+                                text: opt,
+                                value: opt,
+                              }))}
+                              value={val}
+                              onChange={(_, { value }) =>
+                                handleChange(section.id, q.id, value)
+                              }
+                            />
+                          )}
 
-                        {q.type === "email" && (
-                          <Form.Input
-                            type="email"
-                            value={val}
-                            onChange={(e) =>
-                              handleChange(section.id, q.id, e.target.value)
-                            }
-                          />
-                        )}
+                          {q.type === "number" && (
+                            <Form.Input
+                              type="number"
+                              value={val}
+                              onChange={(e) =>
+                                handleChange(section.id, q.id, e.target.value)
+                              }
+                            />
+                          )}
 
-                        {q.type === "date" && (
-                          <Form.Input
-                            type="date"
-                            value={val}
-                            onChange={(e) =>
-                              handleChange(section.id, q.id, e.target.value)
-                            }
-                          />
-                        )}
+                          {q.type === "email" && (
+                            <Form.Input
+                              type="email"
+                              value={val}
+                              onChange={(e) =>
+                                handleChange(section.id, q.id, e.target.value)
+                              }
+                            />
+                          )}
 
-                        {q.type === "time" && (
-                          <Form.Input
-                            type="time"
-                            value={val}
-                            onChange={(e) =>
-                              handleChange(section.id, q.id, e.target.value)
-                            }
-                          />
-                        )}
-                      </Form.Field>
-                    </Grid.Column>
-                  );
-                })}
-              </Grid>
+                          {q.type === "date" && (
+                            <Form.Input
+                              type="date"
+                              value={val}
+                              onChange={(e) =>
+                                handleChange(section.id, q.id, e.target.value)
+                              }
+                            />
+                          )}
+
+                          {q.type === "time" && (
+                            <Form.Input
+                              type="time"
+                              value={val}
+                              onChange={(e) =>
+                                handleChange(section.id, q.id, e.target.value)
+                              }
+                            />
+                          )}
+                        </Form.Field>
+                      </Grid.Column>
+                    );
+                  })}
+                </Grid>
+              </Segment>
+            ))}
+
+            <Divider />
+            <Segment basic style={{ paddingBottom: "2rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: "1rem",
+                }}
+              >
+                <Button  type="button" onClick={ ()=>setResponses({})}>
+                  Clear
+                </Button>
+                <Button
+                  style={{ backgroundColor: "#11329E", color: "white" }}
+                  type="submit"
+                >
+                  Submit
+                </Button>
+              </div>
             </Segment>
-          ))}
+          </Form>
+        )}
 
-          <Divider />
-          <Button color="green" type="submit" fluid>
-            Submit
-          </Button>
-        </Form>
-      )}
-
-      {submitted && (
-        <Message
-          success
-          header="Form submitted!"
-          content="Your responses have been recorded."
-          style={{ marginTop: "1rem" }}
-        />
-      )}
-
-      <Button as={Link} to="/admin" color="blue" style={{ marginTop: "2rem" }}>
-        ← Back to Admin
-      </Button>
-    </Container>
+        {submitted && (
+          <Message
+            success
+            header="Form submitted!"
+            content="Your responses have been recorded."
+            style={{ marginTop: "1rem" }}
+          />
+        )}
+      </Container>
     </>
-    
   );
 };
 

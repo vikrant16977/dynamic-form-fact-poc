@@ -14,8 +14,10 @@ import {
 import { Link } from "react-router-dom";
 import HeaderBar from "../components/HeaderBar";
 import AdminFormBuilder from "../components/AdminFormBuilder";
+import { useNavigate } from "react-router-dom";
 
 const AdminPage = () => {
+  const navigate = useNavigate();
   const { forms, setForms, selectedFormId, addNewForm, updateSelectedFormId } =
     useContext(FormContext);
   const [newFormTitle, setNewFormTitle] = useState("");
@@ -39,8 +41,12 @@ const AdminPage = () => {
               </Grid.Column>
 
               <Grid.Column textAlign="right">
-                <Button color="grey" style={{ marginRight: "1rem" }}>
-                  Discard
+                <Button
+                  color="grey"
+                  style={{ marginRight: "1rem" }}
+                  onClick={() => navigate("/home")}
+                >
+                  Back
                 </Button>
                 <Button color="blue" onClick={handleCreateForm}>
                   Create
@@ -96,11 +102,6 @@ const AdminPage = () => {
                 setForms={setForms}
                 selectedFormId={selectedFormId}
               />
-              <Link to="/form">
-                <Button color="green" fluid style={{ marginTop: "1rem" }}>
-                  Go to User Form Page
-                </Button>
-              </Link>
             </Grid.Column>
           </Grid>
         )}

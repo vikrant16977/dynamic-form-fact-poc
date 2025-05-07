@@ -144,7 +144,16 @@ const AdminFormBuilder = ({
         </Grid.Column>
 
         <Grid.Column width={"12"}>
-          <Header as="h3">Live Preview</Header>
+          <Header as="h3" style={{ textDecoration: "underline" }}>
+            Live Preview
+          </Header>
+        {selectedForm?.sections?.length>0 ?  <Header as="h3" size="tiny" color="grey" style={{ marginTop: "-0.5rem" }}>
+            Click on the below field types to open its editing options*
+          </Header>
+          : <Header as="h3" size="tiny" color="grey" style={{ marginTop: "-0.5rem" }}>
+          Add sections from left menu by entering section's title and clicking on "Add Section" button to start creating your form.
+        </Header>
+}
           <FormPreview
             form={selectedForm}
             setActiveSectionId={setActiveSectionId}
