@@ -180,7 +180,7 @@ export const FormProvider = ({ children }) => {
         ],
       };
 
-      localStorage.setItem("forms", JSON.stringify([sampleForm]));
+      localStorage.setItem("forms", JSON.stringify([{},sampleForm]));
       setForms([sampleForm]);
       setSelectedFormId(sampleForm.id);
     

@@ -6,20 +6,21 @@ import {
   Button,
   Dropdown,
   Grid,
+  Icon
 } from "semantic-ui-react";
 import { FormContext } from "../context/FormContext";
 import FormPreview from "./FormPreview";
 import FieldPropertyModal from "./FieldPropertyModal";
 
 const questionTypeOptions = [
-  { key: "text", text: "Text Field", value: "text" },
-  { key: "textarea", text: "Textarea", value: "textarea" },
-  { key: "radio", text: "Radio Buttons", value: "radio" },
-  { key: "checkbox", text: "Checkbox", value: "checkbox" },
-  { key: "dropdown", text: "Dropdown", value: "dropdown" },
-  { key: "number", text: "Number Field", value: "number" },
-  { key: "email", text: "Email Field", value: "email" },
-  { key: "date", text: "Date Picker", value: "date" },
+  { key: "text", text: "Text Field", value: "text", icon: "edit" },
+  { key: "textarea", text: "Textarea", value: "textarea", icon: "align left" },
+  { key: "radio", text: "Radio Buttons", value: "radio", icon: "dot circle" },
+  { key: "checkbox", text: "Checkbox", value: "checkbox", icon: "check square" },
+  { key: "dropdown", text: "Dropdown", value: "dropdown", icon: "dropdown" },
+  { key: "number", text: "Number Field", value: "number", icon: "hashtag" },
+  { key: "email", text: "Email Field", value: "email", icon: "envelope" },
+  { key: "date", text: "Date Picker", value: "date", icon: "calendar alternate" },
 ];
 
 const AdminFormBuilder = ({
@@ -114,7 +115,7 @@ const AdminFormBuilder = ({
   return (
     <>
       <Grid>
-        <Grid.Column width={4}>
+        <Grid.Column width={"3"}>
           <Segment>
             <Header as="h4">Add Section</Header>
             <Form>
@@ -132,13 +133,16 @@ const AdminFormBuilder = ({
             <Header as="h4">Add Field</Header>
             {questionTypeOptions.map((opt) => (
               <Button
-                key={opt.key}
-                onClick={() => handleAddFieldToSection(opt.value)}
-                style={{ margin: "0.25rem 0" }}
-                fluid
-              >
-                {opt.text}
-              </Button>
+              key={opt.key}
+              icon
+              labelPosition="left"
+              onClick={() => handleAddFieldToSection(opt.value)}
+              style={{ margin: "0.25rem 0" }}
+              fluid
+            >
+              <Icon name={opt.icon} />
+              {opt.text}
+            </Button>
             ))}
           </Segment>
         </Grid.Column>
