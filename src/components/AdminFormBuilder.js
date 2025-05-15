@@ -130,7 +130,7 @@ const AdminFormBuilder = ({
             </Form>
           </Segment>
           <Segment>
-            <Header as="h4">Add Field</Header>
+            <Header as="h4">Components</Header>
             {questionTypeOptions.map((opt) => (
               <Button
               key={opt.key}
@@ -147,7 +147,7 @@ const AdminFormBuilder = ({
           </Segment>
         </Grid.Column>
 
-        <Grid.Column width={"12"}>
+        <Grid.Column width={"13"}>
           <Header as="h3" style={{ textDecoration: "underline" }}>
             Live Preview
           </Header>
