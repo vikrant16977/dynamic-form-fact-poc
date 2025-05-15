@@ -130,7 +130,7 @@ const AdminFormBuilder = ({
             </Form>
           </Segment>
           <Segment>
-            <Header as="h4">Components</Header>
+            <Header as="h4">Add Components</Header>
             {questionTypeOptions.map((opt) => (
               <Button
               key={opt.key}
