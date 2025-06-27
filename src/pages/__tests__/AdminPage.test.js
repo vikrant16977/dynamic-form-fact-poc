@@ -7,7 +7,9 @@ import HeaderBar from "../../components/HeaderBar";
 import AdminFormBuilder from "../../components/AdminFormBuilder";
 
 // Mock dependencies
-jest.mock("../../components/HeaderBar", () => () => <div data-testid="header-bar" />);
+jest.mock("../../components/HeaderBar", () => () => (
+  <div data-testid="header-bar" />
+));
 jest.mock("../../components/AdminFormBuilder", () => (props) => (
   <div data-testid="admin-form-builder">{JSON.stringify(props)}</div>
 ));
@@ -160,10 +162,10 @@ describe("AdminPage", () => {
     // Simulate context loading by not providing forms
     render(
       <FormContext.Provider value={{ forms: [] }}>
-      <MemoryRouter>
-        <AdminPage />
-      </MemoryRouter>
-    </FormContext.Provider>
+        <MemoryRouter>
+          <AdminPage />
+        </MemoryRouter>
+      </FormContext.Provider>
     );
     // Should not crash; may not render anything meaningful
     expect(screen.getByTestId("header-bar")).toBeInTheDocument();

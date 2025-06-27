@@ -5,7 +5,9 @@ import { MemoryRouter } from "react-router-dom";
 import { FormContext } from "../../context/FormContext";
 
 // Mock HeaderBar to avoid rendering issues or image imports
-jest.mock("../../components/HeaderBar", () => () => <div data-testid="header-bar" />);
+jest.mock("../../components/HeaderBar", () => () => (
+  <div data-testid="header-bar" />
+));
 
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -18,9 +20,11 @@ const defaultForms = [
   { id: 2, title: "Form 2" },
 ];
 
-function renderWithContext(
-  { forms = defaultForms, updateSelectedFormId = jest.fn(), addNewForm = jest.fn() } = {}
-) {
+function renderWithContext({
+  forms = defaultForms,
+  updateSelectedFormId = jest.fn(),
+  addNewForm = jest.fn(),
+} = {}) {
   return render(
     <FormContext.Provider value={{ forms, updateSelectedFormId, addNewForm }}>
       <MemoryRouter>
@@ -39,7 +43,9 @@ describe("HomePage", () => {
   it("renders HeaderBar and main UI elements", () => {
     renderWithContext();
     expect(screen.getByTestId("header-bar")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /create a new form/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /create a new form/i })
+    ).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/enter form name/i)).toBeInTheDocument();
     expect(screen.getByText(/select pre-existing forms/i)).toBeInTheDocument();
     expect(screen.getByText(/discard/i)).toBeInTheDocument();
@@ -86,12 +92,12 @@ describe("HomePage", () => {
   it("shows dropdown options and handles selecting existing form", () => {
     renderWithContext();
     const dropdown = screen.getByText(/select pre-existing forms/i);
-fireEvent.click(dropdown);
+    fireEvent.click(dropdown);
 
-const menu = document.querySelector('.visible.menu.transition');
-expect(menu).toBeTruthy(); // makes sure we found it
-const option = within(menu).getByText("Form 1");
-fireEvent.click(option);
+    const menu = document.querySelector(".visible.menu.transition");
+    expect(menu).toBeTruthy(); // makes sure we found it
+    const option = within(menu).getByText("Form 1");
+    fireEvent.click(option);
 
     // Once selected, Edit button should appear
     expect(screen.getByRole("button", { name: /edit/i })).toBeInTheDocument();
@@ -101,12 +107,12 @@ fireEvent.click(option);
     const updateSelectedFormId = jest.fn();
     renderWithContext({ updateSelectedFormId });
     const dropdown = screen.getByText(/select pre-existing forms/i);
-fireEvent.click(dropdown);
+    fireEvent.click(dropdown);
 
-const menu = document.querySelector('.visible.menu.transition');
-expect(menu).toBeTruthy(); // makes sure we found it
-const option = within(menu).getByText("Form 1");
-fireEvent.click(option);
+    const menu = document.querySelector(".visible.menu.transition");
+    expect(menu).toBeTruthy(); // makes sure we found it
+    const option = within(menu).getByText("Form 1");
+    fireEvent.click(option);
 
     const editBtn = screen.getByRole("button", { name: /edit/i });
     fireEvent.click(editBtn);
