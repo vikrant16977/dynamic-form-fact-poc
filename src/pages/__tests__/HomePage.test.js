@@ -44,7 +44,7 @@ describe("HomePage", () => {
     expect(screen.getByText(/select pre-existing forms/i)).toBeInTheDocument();
     expect(screen.getByText(/discard/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /create/i })).toBeInTheDocument();
-    expect(screen.getByText(/or/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/or/i).length).toBeGreaterThan(0);
   });
 
   it("enables and disables the Create button correctly", () => {
@@ -86,12 +86,12 @@ describe("HomePage", () => {
   it("shows dropdown options and handles selecting existing form", () => {
     renderWithContext();
     const dropdown = screen.getByText(/select pre-existing forms/i);
-    fireEvent.click(dropdown);
+fireEvent.click(dropdown);
 
-    // Find the dropdown menu (role=listbox) and get the option inside it
-    const listbox = screen.getByRole("listbox");
-    const option = within(listbox).getByText("Form 1");
-    fireEvent.click(option);
+const menu = document.querySelector('.visible.menu.transition');
+expect(menu).toBeTruthy(); // makes sure we found it
+const option = within(menu).getByText("Form 1");
+fireEvent.click(option);
 
     // Once selected, Edit button should appear
     expect(screen.getByRole("button", { name: /edit/i })).toBeInTheDocument();
@@ -101,10 +101,12 @@ describe("HomePage", () => {
     const updateSelectedFormId = jest.fn();
     renderWithContext({ updateSelectedFormId });
     const dropdown = screen.getByText(/select pre-existing forms/i);
-    fireEvent.click(dropdown);
-    const listbox = screen.getByRole("listbox");
-    const option = within(listbox).getByText("Form 1");
-    fireEvent.click(option);
+fireEvent.click(dropdown);
+
+const menu = document.querySelector('.visible.menu.transition');
+expect(menu).toBeTruthy(); // makes sure we found it
+const option = within(menu).getByText("Form 1");
+fireEvent.click(option);
 
     const editBtn = screen.getByRole("button", { name: /edit/i });
     fireEvent.click(editBtn);

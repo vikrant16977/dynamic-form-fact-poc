@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomePage matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    data-testid="header-bar"
+  />
+  <div
+    class="ui text container"
+    style="margin-top: 10rem;"
+  >
+    <div
+      class="ui raised very padded segment"
+      style="box-shadow: 0 1px 6px rgba(0,0,0,0.1);"
+    >
+      <h3
+        class="ui header"
+      >
+        Create a New Form
+      </h3>
+      <div
+        class="ui fluid input"
+        style="margin-bottom: 2rem; margin-top: 1rem;"
+      >
+        <input
+          placeholder="Enter Form Name"
+          type="text"
+          value=""
+        />
+      </div>
+      <div
+        class="ui horizontal divider"
+      >
+        Or
+      </div>
+      <div
+        aria-expanded="false"
+        class="ui fluid selection dropdown"
+        role="listbox"
+        style="margin: 2rem 0px;"
+        tabindex="0"
+      >
+        <div
+          aria-atomic="true"
+          aria-live="polite"
+          class="divider default text"
+          role="alert"
+        >
+          Select pre-existing Forms
+        </div>
+        <i
+          aria-hidden="true"
+          class="dropdown icon"
+        />
+        <div
+          class="menu transition"
+        >
+          <div
+            aria-checked="false"
+            aria-selected="true"
+            class="selected item"
+            role="option"
+            style="pointer-events: all;"
+          >
+            <span
+              class="text"
+            >
+              Form 1
+            </span>
+          </div>
+          <div
+            aria-checked="false"
+            aria-selected="false"
+            class="item"
+            role="option"
+            style="pointer-events: all;"
+          >
+            <span
+              class="text"
+            >
+              Form 2
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="ui stackable two column grid"
+      >
+        <div
+          class="column"
+        >
+          <button
+            class="ui fluid button"
+          >
+            Discard
+          </button>
+        </div>
+        <div
+          class="column"
+        >
+          <button
+            class="ui fluid disabled button"
+            disabled=""
+            style="background-color: rgb(17, 50, 158); color: white;"
+            tabindex="-1"
+          >
+            Create
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
