@@ -159,11 +159,11 @@ describe("AdminPage", () => {
   it("renders loading state if context is slow (simulate)", async () => {
     // Simulate context loading by not providing forms
     render(
-      <FormContext.Provider value={{}}>
-        <MemoryRouter>
-          <AdminPage />
-        </MemoryRouter>
-      </FormContext.Provider>
+      <FormContext.Provider value={{ forms: [] }}>
+      <MemoryRouter>
+        <AdminPage />
+      </MemoryRouter>
+    </FormContext.Provider>
     );
     // Should not crash; may not render anything meaningful
     expect(screen.getByTestId("header-bar")).toBeInTheDocument();
