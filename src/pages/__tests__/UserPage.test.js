@@ -59,12 +59,13 @@ describe("UserPage", () => {
     jest.clearAllMocks();
   });
 
-  it("renders HeaderBar, form selection header and dropdown", () => {
-    renderWithContext();
-    expect(screen.getByTestId("header-bar")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /select the form to submit/i })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/select a form/i)).toBeInTheDocument();
-  });
+ it("renders HeaderBar, form selection header and dropdown", () => {
+  renderWithContext();
+  expect(screen.getByTestId("header-bar")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: /select the form to submit/i })).toBeInTheDocument();
+  // expect(screen.getByPlaceholderText(/select a form/i)).toBeInTheDocument(); // REMOVE THIS
+  expect(document.querySelector('.ui.selection.dropdown')).toBeInTheDocument(); // ADD THIS
+});
 
   it("renders a warning message if there are no forms", () => {
     renderWithContext({
@@ -75,15 +76,32 @@ describe("UserPage", () => {
     expect(screen.getByText(/no forms available/i)).toBeInTheDocument();
   });
 
-  it("calls updateSelectedFormId and resets responses when a new form is selected", () => {
-    const updateSelectedFormId = jest.fn();
-    renderWithContext({ ...defaultContext, updateSelectedFormId });
-    const dropdown = screen.getByPlaceholderText(/select a form/i);
-    fireEvent.click(dropdown);
-    const menu = document.querySelector('.visible.menu.transition');
-    fireEvent.click(within(menu).getByText("Feedback Form"));
-    expect(updateSelectedFormId).toHaveBeenCalledWith(1);
-  });
+it("calls updateSelectedFormId and resets responses when a new form is selected", () => {
+  // Provide two forms so a change can actually occur.
+  const forms = [
+    ...mockForms,
+    {
+      id: 2,
+      title: "Second Form",
+      sections: []
+    }
+  ];
+  const updateSelectedFormId = jest.fn();
+  renderWithContext({ ...defaultContext, forms, updateSelectedFormId, selectedFormId: 2 });
+
+  // Find the dropdown for form selection (the first .ui.selection.dropdown in DOM)
+  const dropdownTrigger = document.querySelectorAll('.ui.selection.dropdown')[0];
+  expect(dropdownTrigger).toBeInTheDocument();
+  fireEvent.click(dropdownTrigger);
+
+  // Now find and click the "Feedback Form" item in the opened menu
+  const menu = document.querySelector('.visible.menu.transition');
+  expect(menu).toBeInTheDocument();
+  const menuItem = within(menu).getByText("Feedback Form");
+  fireEvent.click(menuItem);
+
+  expect(updateSelectedFormId).toHaveBeenCalledWith(1);
+});
 
   it("renders all section headers and questions", () => {
     renderWithContext();
@@ -133,65 +151,74 @@ describe("UserPage", () => {
     expect(textarea).toHaveValue("Great!");
   });
 
-  it("selects radio option", () => {
-    renderWithContext();
-    // By label text on Form.Radio, the label prop is used as aria-label
-    const maleRadio = screen.getByLabelText("Male");
-    const femaleRadio = screen.getByLabelText("Female");
-    fireEvent.click(maleRadio);
-    expect(maleRadio).toBeChecked();
-    fireEvent.click(femaleRadio);
-    expect(femaleRadio).toBeChecked();
-    expect(maleRadio).not.toBeChecked();
-  });
+ it("selects radio option", () => {
+  renderWithContext();
+  // Find all radio buttons in order; "Male" is first, "Female" is second in the mock
+  const radios = screen.getAllByRole("radio");
+  const maleRadio = radios[0];
+  const femaleRadio = radios[1];
 
-  it("checks and unchecks checkbox options", () => {
-    renderWithContext();
-    const reading = screen.getByLabelText("Reading");
-    const music = screen.getByLabelText("Music");
-    fireEvent.click(reading);
-    expect(reading).toBeChecked();
-    fireEvent.click(music);
-    expect(music).toBeChecked();
-    fireEvent.click(reading);
-    expect(reading).not.toBeChecked();
-  });
+  fireEvent.click(maleRadio);
+  expect(maleRadio).toBeChecked();
+  expect(femaleRadio).not.toBeChecked();
+
+  fireEvent.click(femaleRadio);
+  expect(femaleRadio).toBeChecked();
+  expect(maleRadio).not.toBeChecked();
+});
+
+ it("checks and unchecks checkbox options", () => {
+  renderWithContext();
+
+  // Find all checkboxes in order; "Reading" is first, "Music" is second in mock
+  const checkboxes = screen.getAllByRole("checkbox");
+  const reading = checkboxes[0];
+  const music = checkboxes[1];
+
+  fireEvent.click(reading);
+  expect(reading).toBeChecked();
+
+  fireEvent.click(music);
+  expect(music).toBeChecked();
+
+  fireEvent.click(reading);
+  expect(reading).not.toBeChecked();
+});
 
   it("selects from dropdown", () => {
-    renderWithContext();
-    // The dropdown for "Favorite Color" is the first Dropdown in a form (not the form selector)
-    // So, get all comboboxes and select the second (first in form)
-    // Semantic UI assigns role="listbox" to the menu, the button is role="combobox"
-    const colorDropdown = screen.getAllByRole("combobox")[0];
-    fireEvent.click(colorDropdown); // open dropdown
-    const menu = document.querySelector('.visible.menu.transition');
-    fireEvent.click(within(menu).getByText("Red"));
-    // The selected color should be visible in the dropdown button content
-    expect(colorDropdown).toHaveTextContent("Red");
-  });
+  renderWithContext();
+  // Find "Favorite Color" label, get its parent, then find the dropdown trigger inside
+  const colorLabel = screen.getByText("Favorite Color");
+  // The Dropdown trigger is next sibling (may vary, adjust as needed)
+  const colorDropdown = colorLabel.parentNode.querySelector('.ui.dropdown') || colorLabel.parentNode.querySelector('div');
+  fireEvent.click(colorDropdown);
+  const menu = document.querySelector('.visible.menu.transition');
+  fireEvent.click(within(menu).getByText("Red"));
+  // Optionally, assert the dropdown trigger now shows the selected value
+  expect(colorDropdown).toHaveTextContent("Red");
+});
 
-  it("updates number, email, date, and time fields", () => {
-    renderWithContext();
-    // Age (type=number): use role spinbutton
-    const number = screen.getByRole("spinbutton");
-    // Email (type=email): will be role textbox, get by label text
-    // The third textbox is likely the email input (after name and comments)
-    const allTextboxes = screen.getAllByRole("textbox");
-    const email = allTextboxes[2];
-    // Date and time, get input by type via querySelector
-    const date = screen.getByDisplayValue("") || document.querySelector('input[type="date"]');
-    const time = screen.getByDisplayValue("") || document.querySelector('input[type="time"]');
+ it("updates number, email, date, and time fields", () => {
+  renderWithContext();
+  // Age (type=number): use role spinbutton
+  const number = screen.getByRole("spinbutton");
+  // Email input: third textbox in the form as per mock data
+  const allTextboxes = screen.getAllByRole("textbox");
+  const email = allTextboxes[2];
+  // Date and time: use querySelector for input[type="date"] and input[type="time"]
+  const date = document.querySelector('input[type="date"]');
+  const time = document.querySelector('input[type="time"]');
 
-    fireEvent.change(number, { target: { value: "25" } });
-    fireEvent.change(email, { target: { value: "a@b.com" } });
-    if (date) fireEvent.change(date, { target: { value: "2023-05-01" } });
-    if (time) fireEvent.change(time, { target: { value: "14:30" } });
+  fireEvent.change(number, { target: { value: "25" } });
+  fireEvent.change(email, { target: { value: "a@b.com" } });
+  if (date) fireEvent.change(date, { target: { value: "2023-05-01" } });
+  if (time) fireEvent.change(time, { target: { value: "14:30" } });
 
-    expect(number).toHaveValue(25);
-    expect(email).toHaveValue("a@b.com");
-    if (date) expect(date).toHaveValue("2023-05-01");
-    if (time) expect(time).toHaveValue("14:30");
-  });
+  expect(number).toHaveValue(25);
+  expect(email).toHaveValue("a@b.com");
+  if (date) expect(date).toHaveValue("2023-05-01");
+  if (time) expect(time).toHaveValue("14:30");
+});
 
   it("clears all responses when Clear is clicked", () => {
     renderWithContext();

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import AdminPage from "../AdminPage";
 import { FormContext } from "../../context/FormContext";
 import { MemoryRouter } from "react-router-dom";
@@ -114,19 +114,20 @@ describe("AdminPage", () => {
   });
 
   it("calls updateSelectedFormId when dropdown value changes", () => {
-    const forms = [{ id: 1, title: "Form 1" }];
-    const updateSelectedFormId = jest.fn();
-    renderAdminPage({
-      forms,
-      selectedFormId: null,
-      updateSelectedFormId,
-    });
-    const dropdown = screen.getByRole("listbox");
-    fireEvent.click(dropdown);
-    const option = screen.getByText("Form 1");
-    fireEvent.click(option);
-    expect(updateSelectedFormId).toHaveBeenCalledWith(1);
+  const forms = [{ id: 1, title: "Form 1" }];
+  const updateSelectedFormId = jest.fn();
+  renderAdminPage({
+    forms,
+    selectedFormId: null,
+    updateSelectedFormId,
   });
+  const dropdown = screen.getByRole("listbox");
+  fireEvent.click(dropdown);
+  const menu = document.querySelector('.visible.menu.transition');
+  const option = within(menu).getByText("Form 1");
+  fireEvent.click(option);
+  expect(updateSelectedFormId).toHaveBeenCalledWith(1);
+});
 
   it("renders AdminFormBuilder when selectedFormId matches a form", () => {
     const forms = [{ id: 5, title: "Form X" }];
