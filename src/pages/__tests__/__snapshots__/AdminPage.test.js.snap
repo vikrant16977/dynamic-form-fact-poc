@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdminPage snapshot test: initial render, no newForm, no forms 1`] = `
+<DocumentFragment>
+  <div
+    data-testid="header-bar"
+  />
+  <div
+    class="ui container"
+    style="margin-top: 6rem;"
+  >
+    <div
+      class="ui segment"
+    >
+      <div
+        class="ui middle aligned two column grid"
+      >
+        <div
+          class="column"
+        >
+          <h2
+            class="ui header"
+          >
+            Form Editor
+          </h2>
+        </div>
+         
+      </div>
+      <div
+        class="ui divider"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;

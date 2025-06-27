@@ -1,7 +1,7 @@
 import React from "react";
 import { Menu, Image, Icon } from "semantic-ui-react";
 import { Link, useLocation } from "react-router-dom";
-import logo from "./images/socal-gas.png";
+// import logo from "./images/socal-gas.png";
 
 const HeaderBar = () => {
   const location = useLocation();
