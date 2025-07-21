@@ -34,8 +34,11 @@ const AdminFormBuilder = ({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState(null);
   const [selectedSectionId, setSelectedSectionId] = useState(null);
+  const [sectionCounter, setSectionCounter] = useState(1);
+  const [questionCounter, setQuestionCounter] = useState(1);
 
   const { addSectionToForm } = useContext(FormContext);
+
   const handleQuestionClick = (sectionId, questionId) => {
     const section = selectedForm.sections.find((s) => s.id === sectionId);
     const question = section.questions.find((q) => q.id === questionId);
@@ -65,15 +68,17 @@ const AdminFormBuilder = ({
     localStorage.setItem("forms", JSON.stringify(updatedForms));
     setModalOpen(false);
   };
+
   const handleAddSection = () => {
     if (newSectionTitle.trim() !== "") {
       const newSection = {
-        id: Date.now(),
+        id: `sec${sectionCounter}`,
         sectionTitle: newSectionTitle.trim(),
         questions: [],
       };
       addSectionToForm(selectedFormId, newSection);
       setNewSectionTitle("");
+      setSectionCounter(sectionCounter + 1);
     }
   };
 
@@ -83,19 +88,22 @@ const AdminFormBuilder = ({
       return;
     }
 
+    const newQuestion = {
+      id: `q${questionCounter}`,
+      label: `${type} field`,
+      type,
+      options:
+        type === "radio" || type === "dropdown"
+          ? ["Option 1", "Option 2"]
+          : [],
+      required: true,
+    };
+    setQuestionCounter(questionCounter + 1);
+
     const updatedForms = forms.map((form) => {
       if (form.id === selectedFormId) {
         const updatedSections = form.sections.map((section) => {
           if (section.id === activeSectionId) {
-            const newQuestion = {
-              id: Date.now(),
-              label: `${type} field`,
-              type,
-              options:
-                type === "radio" || type === "dropdown"
-                  ? ["Option 1", "Option 2"]
-                  : [],
-            };
             return {
               ...section,
               questions: [...section.questions, newQuestion],
@@ -133,16 +141,16 @@ const AdminFormBuilder = ({
             <Header as="h4">Add Components</Header>
             {questionTypeOptions.map((opt) => (
               <Button
-              key={opt.key}
-              icon
-              labelPosition="left"
-              onClick={() => handleAddFieldToSection(opt.value)}
-              style={{ margin: "0.25rem 0" }}
-              fluid
-            >
-              <Icon name={opt.icon} />
-              {opt.text}
-            </Button>
+                key={opt.key}
+                icon
+                labelPosition="left"
+                onClick={() => handleAddFieldToSection(opt.value)}
+                style={{ margin: "0.25rem 0" }}
+                fluid
+              >
+                <Icon name={opt.icon} />
+                {opt.text}
+              </Button>
             ))}
           </Segment>
         </Grid.Column>
@@ -151,13 +159,26 @@ const AdminFormBuilder = ({
           <Header as="h3" style={{ textDecoration: "underline" }}>
             Live Preview
           </Header>
-        {selectedForm?.sections?.length>0 ?  <Header as="h3" size="tiny" color="grey" style={{ marginTop: "-0.5rem" }}>
-            Click on the below field types to open its editing options*
-          </Header>
-          : <Header as="h3" size="tiny" color="grey" style={{ marginTop: "-0.5rem" }}>
-          Add sections from left menu by entering section's title and clicking on "Add Section" button to start creating your form.
-        </Header>
-}
+          {selectedForm?.sections?.length > 0 ? (
+            <Header
+              as="h3"
+              size="tiny"
+              color="grey"
+              style={{ marginTop: "-0.5rem" }}
+            >
+              Click on the below field types to open its editing options*
+            </Header>
+          ) : (
+            <Header
+              as="h3"
+              size="tiny"
+              color="grey"
+              style={{ marginTop: "-0.5rem" }}
+            >
+              Add sections from left menu by entering section's title and
+              clicking on "Add Section" button to start creating your form.
+            </Header>
+          )}
           <FormPreview
             form={selectedForm}
             setActiveSectionId={setActiveSectionId}
