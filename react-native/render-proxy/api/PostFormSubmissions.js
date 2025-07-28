@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://fact-merge-c5s7.vercel.app/api/proxy', {
+    const response = await fetch('https://dynamicformbackend.onrender.com/odata/v4/catalog/FormSubmissions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
