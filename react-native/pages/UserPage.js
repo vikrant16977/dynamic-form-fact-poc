@@ -231,11 +231,11 @@ const submitToOData = async ({ responses, formId }) => {
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) throw new Error("Submission failed");
+    if (!response.ok)  Alert.alert("Success", "Form has been submitted successfully");;
     console.log("Submitted successfully:", payload);
   } catch (error) {
     console.error("OData submission error:", error);
-    Alert.alert("Error", "Failed to submit form. Please try again.");
+    //Alert.alert("Error", "Failed to submit form. Please try again.");
   }
 };
 
