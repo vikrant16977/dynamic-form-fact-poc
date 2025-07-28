@@ -28,6 +28,8 @@ NetInfo.configure({
 
 const FORM_RESPONSES_CACHE_KEY = "cached_form_responses";
 const FORM_SELECTION_CACHE_KEY = "cached_form_selection";
+const PENDING_SUBMISSIONS_KEY = "pending_submissions";
+
 
 const UserPage = () => {
   const {
@@ -55,12 +57,12 @@ const UserPage = () => {
   const selectedForm = getSelectedForm();
 
   // Network status listener
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsOffline(!state.isConnected);
-    });
-    return () => unsubscribe();
-  }, []);
+  // useEffect(() => {
+  //   const unsubscribe = NetInfo.addEventListener((state) => {
+  //     setIsOffline(!state.isConnected);
+  //   });
+  //   return () => unsubscribe();
+  // }, []);
 
   // Load cached responses if offline
   useEffect(() => {
@@ -82,6 +84,25 @@ const UserPage = () => {
   useEffect(() => {
     AsyncStorage.setItem("comments", JSON.stringify(comments));
   }, [comments]);
+
+  useEffect(() => {
+  const unsubscribe = NetInfo.addEventListener(async (state) => {
+    setIsOffline(!state.isConnected);
+
+    if (state.isConnected) {
+      const queue = await AsyncStorage.getItem(PENDING_SUBMISSIONS_KEY);
+      if (queue) {
+        const submissions = JSON.parse(queue);
+        for (const item of submissions) {
+          await submitToOData(item);
+        }
+        await AsyncStorage.removeItem(PENDING_SUBMISSIONS_KEY);
+      }
+    }
+  });
+
+  return () => unsubscribe();
+}, []);
 
   // Load comments if offline
   useEffect(() => {
@@ -145,20 +166,25 @@ const UserPage = () => {
     setModalField({ sectionId: null, questionId: null, option: null, value: "" });
   };
 
-  const handleSubmit = async () => {
-    if (isOffline) {
-      Alert.alert(
-        "Offline",
-        "You're offline. Your responses are saved locally and will need to be submitted when online."
-      );
-      setSubmitted(true);
-    } else {
-      console.log("Form submitted:", responses, comments);
-      setSubmitted(true);
-      await AsyncStorage.removeItem(FORM_RESPONSES_CACHE_KEY);
-      await AsyncStorage.removeItem("comments");
-    }
-  };
+const handleSubmit = async () => {
+  const payload = { responses, formId: selectedFormId };
+
+  if (isOffline) {
+    Alert.alert("Offline", "Responses saved locally. Will submit when online.");
+    const existingQueue = await AsyncStorage.getItem(PENDING_SUBMISSIONS_KEY);
+    const queue = existingQueue ? JSON.parse(existingQueue) : [];
+    queue.push(payload);
+    await AsyncStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(queue));
+  } else {
+    await submitToOData(payload);
+  }
+
+  setSubmitted(true);
+  await AsyncStorage.removeItem(FORM_RESPONSES_CACHE_KEY);
+  await AsyncStorage.removeItem("comments");
+};
+
+
 
   const handleClear = async () => {
     setResponses({});
@@ -188,6 +214,32 @@ const UserPage = () => {
       handleChange(sectionId, questionId, isoString);
     }
   };
+
+const submitToOData = async ({ responses, formId }) => {
+  const payload = {
+    ID: Date.now(), // or use a UUID if needed
+    form_ID_ID: formId,
+    submission: JSON.stringify(responses),
+  };
+
+  try {
+    const response = await fetch("https://dynamicformbackend.onrender.com/odata/v4/catalog/FormSubmissions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer YOUR_TOKEN", // Replace with actual token
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) throw new Error("Submission failed");
+    console.log("Submitted successfully:", payload);
+  } catch (error) {
+    console.error("OData submission error:", error);
+    Alert.alert("Error", "Failed to submit form. Please try again.");
+  }
+};
+
 
   const handleTimeChange = (event, selectedTime, sectionId, questionId) => {
     setShowTimePicker((prev) => ({
