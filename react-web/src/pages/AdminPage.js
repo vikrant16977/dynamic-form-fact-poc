@@ -44,7 +44,7 @@ const generateShortId = (prefix) => {
 
     const payload = {
      
-      ID: Math.floor(Math.random() * 10000) ,
+      ID:Math.floor(1000 + Math.random() * 9000), 
       title: selectedForm.title,
       description: selectedForm.description || "Form created via builder",
       schema: JSON.stringify(selectedForm),

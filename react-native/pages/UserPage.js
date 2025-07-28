@@ -217,8 +217,8 @@ const handleSubmit = async () => {
 
 const submitToOData = async ({ responses, formId }) => {
   const payload = {
-    ID: Date.now(), // or use a UUID if needed
-    form_ID_ID: formId,
+    ID: Math.floor(Math.random() * 10000), // or use a UUID if needed
+    form_ID_ID: selectedFormId,
     submission: JSON.stringify(responses),
   };
 
@@ -227,7 +227,6 @@ const submitToOData = async ({ responses, formId }) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer YOUR_TOKEN", // Replace with actual token
       },
       body: JSON.stringify(payload),
     });
