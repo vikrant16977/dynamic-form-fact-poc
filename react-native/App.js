@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomePage from "./pages/HomePage";
 import AdminPage from "./pages/AdminPage";
 import UserPage from "./pages/UserPage";
+import MySubmissions from './pages/MySubmissions';
+import SubmissionDetail from './pages/SubmissionDetails';
 import { FormProvider } from "./context/FormContext";
 
 const Stack = createNativeStackNavigator();
@@ -16,6 +18,9 @@ export default function App() {
           <Stack.Screen name="Home" component={HomePage} />
           <Stack.Screen name="Admin" component={AdminPage} />
           <Stack.Screen name="Form" component={UserPage} />
+          <Stack.Screen name="MySubmissions" component={MySubmissions} />
+          <Stack.Screen name="SubmissionDetail" component={SubmissionDetail} />
+
         </Stack.Navigator>
       </NavigationContainer>
     </FormProvider>

@@ -8,7 +8,7 @@ const HeaderBar = ({ routeName }) => {
   return (
     <>
       {/* Logo Row */}
-      
+
       {/* Navigation Bar */}
       <View style={styles.navbar}>
         <View style={styles.leftSection}>
@@ -34,9 +34,12 @@ const HeaderBar = ({ routeName }) => {
             <Text style={styles.icon}>👤</Text>
             <Text style={styles.iconLabel}>User</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconNav}>
-            <Text style={styles.icon}>❓</Text>
-            <Text style={styles.iconLabel}>Help</Text>
+          <TouchableOpacity
+            style={styles.iconNav}
+            onPress={() => navigation?.navigate("MySubmissions")}
+          >
+            <Text style={styles.icon}>📄</Text>
+            <Text style={styles.iconLabel}>Submissions</Text>
           </TouchableOpacity>
         </View>
       </View>

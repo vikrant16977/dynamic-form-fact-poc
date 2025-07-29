@@ -30,7 +30,6 @@ const FORM_RESPONSES_CACHE_KEY = "cached_form_responses";
 const FORM_SELECTION_CACHE_KEY = "cached_form_selection";
 const PENDING_SUBMISSIONS_KEY = "pending_submissions";
 
-
 const UserPage = () => {
   const {
     forms,
@@ -71,7 +70,9 @@ const UserPage = () => {
         try {
           const cached = await AsyncStorage.getItem(FORM_RESPONSES_CACHE_KEY);
           if (cached) setResponses(JSON.parse(cached));
-          const cachedSel = await AsyncStorage.getItem(FORM_SELECTION_CACHE_KEY);
+          const cachedSel = await AsyncStorage.getItem(
+            FORM_SELECTION_CACHE_KEY
+          );
           if (cachedSel) updateSelectedFormId(JSON.parse(cachedSel));
         } catch {}
       }
@@ -86,23 +87,23 @@ const UserPage = () => {
   }, [comments]);
 
   useEffect(() => {
-  const unsubscribe = NetInfo.addEventListener(async (state) => {
-    setIsOffline(!state.isConnected);
+    const unsubscribe = NetInfo.addEventListener(async (state) => {
+      setIsOffline(!state.isConnected);
 
-    if (state.isConnected) {
-      const queue = await AsyncStorage.getItem(PENDING_SUBMISSIONS_KEY);
-      if (queue) {
-        const submissions = JSON.parse(queue);
-        for (const item of submissions) {
-          await submitToOData(item);
+      if (state.isConnected) {
+        const queue = await AsyncStorage.getItem(PENDING_SUBMISSIONS_KEY);
+        if (queue) {
+          const submissions = JSON.parse(queue);
+          for (const item of submissions) {
+            await submitToOData(item);
+          }
+          await AsyncStorage.removeItem(PENDING_SUBMISSIONS_KEY);
         }
-        await AsyncStorage.removeItem(PENDING_SUBMISSIONS_KEY);
       }
-    }
-  });
+    });
 
-  return () => unsubscribe();
-}, []);
+    return () => unsubscribe();
+  }, []);
 
   // Load comments if offline
   useEffect(() => {
@@ -124,14 +125,18 @@ const UserPage = () => {
     });
   };
 
-  const handleOptionPress = (sectionId, questionId, option, currentValue, type) => {
+  const handleOptionPress = (
+    sectionId,
+    questionId,
+    option,
+    currentValue,
+    type
+  ) => {
     setModalField({
       sectionId,
       questionId,
       option,
-      value:
-        comments?.[sectionId]?.[questionId]?.[option] ??
-        "",
+      value: comments?.[sectionId]?.[questionId]?.[option] ?? "",
       type,
       currentValue,
     });
@@ -139,7 +144,8 @@ const UserPage = () => {
   };
 
   const handleModalSave = () => {
-    const { sectionId, questionId, option, value, type, currentValue } = modalField;
+    const { sectionId, questionId, option, value, type, currentValue } =
+      modalField;
     setComments((prev) => ({
       ...prev,
       [sectionId]: {
@@ -163,28 +169,37 @@ const UserPage = () => {
       handleChange(sectionId, questionId, updatedArr);
     }
     setModalVisible(false);
-    setModalField({ sectionId: null, questionId: null, option: null, value: "" });
+    setModalField({
+      sectionId: null,
+      questionId: null,
+      option: null,
+      value: "",
+    });
   };
 
-const handleSubmit = async () => {
-  const payload = { responses, formId: selectedFormId };
+  const handleSubmit = async () => {
+    const payload = { responses, formId: selectedFormId };
 
-  if (isOffline) {
-    Alert.alert("Offline", "Responses saved locally. Will submit when online.");
-    const existingQueue = await AsyncStorage.getItem(PENDING_SUBMISSIONS_KEY);
-    const queue = existingQueue ? JSON.parse(existingQueue) : [];
-    queue.push(payload);
-    await AsyncStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(queue));
-  } else {
-    await submitToOData(payload);
-  }
+    if (isOffline) {
+      Alert.alert(
+        "Offline",
+        "Responses saved locally. Will submit when online."
+      );
+      const existingQueue = await AsyncStorage.getItem(PENDING_SUBMISSIONS_KEY);
+      const queue = existingQueue ? JSON.parse(existingQueue) : [];
+      queue.push(payload);
+      await AsyncStorage.setItem(
+        PENDING_SUBMISSIONS_KEY,
+        JSON.stringify(queue)
+      );
+    } else {
+      await submitToOData(payload);
+    }
 
-  setSubmitted(true);
-  await AsyncStorage.removeItem(FORM_RESPONSES_CACHE_KEY);
-  await AsyncStorage.removeItem("comments");
-};
-
-
+    setSubmitted(true);
+    await AsyncStorage.removeItem(FORM_RESPONSES_CACHE_KEY);
+    await AsyncStorage.removeItem("comments");
+  };
 
   const handleClear = async () => {
     setResponses({});
@@ -215,30 +230,63 @@ const handleSubmit = async () => {
     }
   };
 
-const submitToOData = async ({ responses, formId }) => {
-  const payload = {
-    ID: Math.floor(Math.random() * 10000), // or use a UUID if needed
-    form_ID_ID: selectedFormId,
-    submission: JSON.stringify(responses),
-  };
+  const submitToOData = async ({ responses, formId }) => {
+    const payload = {
+      ID: Math.floor(Math.random() * 10000), // or use a UUID if needed
+      form_ID_ID: selectedFormId,
+      submission: JSON.stringify(responses),
+    };
 
-  try {
-    const response = await fetch("https://fact-merge-c5s7.vercel.app/api/proxy", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(
+        "https://fact-merge-c5s7.vercel.app/api/proxy",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
-    if (!response.ok)  Alert.alert("Success", "Form has been submitted successfully");;
-    console.log("Submitted successfully:", payload);
-  } catch (error) {
-    console.error("OData submission error:", error);
-    //Alert.alert("Error", "Failed to submit form. Please try again.");
-  }
+      if (!response.ok)
+        Alert.alert("Success", "Form has been submitted successfully");
+      console.log("Submitted successfully:", payload);
+
+const submission = {
+  formId: selectedFormId,
+  formTitle: selectedForm?.title,
+  responses,
+  date: new Date().toISOString(),
+  formStructure: selectedForm, // include full structure
 };
 
+const existing = await AsyncStorage.getItem("submitted_forms");
+const all = existing ? JSON.parse(existing) : [];
+all.push(submission);
+await AsyncStorage.setItem("submitted_forms", JSON.stringify(all));
+
+
+      
+    } catch (error) {
+      console.error("OData submission error:", error);
+     
+const submission = {
+  formId: selectedFormId,
+  formTitle: selectedForm?.title,
+  responses,
+  date: new Date().toISOString(),
+  formStructure: selectedForm, // include full structure
+};
+
+const existing = await AsyncStorage.getItem("submitted_forms");
+const all = existing ? JSON.parse(existing) : [];
+all.push(submission);
+await AsyncStorage.setItem("submitted_forms", JSON.stringify(all));
+
+      //Alert.alert("Error", "Failed to submit form. Please try again.");
+    }
+  };
 
   const handleTimeChange = (event, selectedTime, sectionId, questionId) => {
     setShowTimePicker((prev) => ({
@@ -255,7 +303,6 @@ const submitToOData = async ({ responses, formId }) => {
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-     
         <ActivityIndicator size="large" color="#11329E" />
         <Text>Loading forms...</Text>
       </View>
@@ -271,7 +318,8 @@ const submitToOData = async ({ responses, formId }) => {
         {isOffline && (
           <View style={styles.offlineBox}>
             <Text style={styles.offlineText}>
-              You are offline. Filling forms will be saved locally and must be submitted later.
+              You are offline. Filling forms will be saved locally and must be
+              submitted later.
             </Text>
           </View>
         )}
@@ -307,7 +355,7 @@ const submitToOData = async ({ responses, formId }) => {
                     const sectionResp = responses[section.id] || {};
                     const val = sectionResp[q.id] ?? "";
                     const commentMap = comments?.[section.id]?.[q.id] || {};
-                    const pickerKey = `${section.id}-${q.id}`
+                    const pickerKey = `${section.id}-${q.id}`;
 
                     return (
                       <View key={q.id} style={styles.questionContainer}>
@@ -329,7 +377,7 @@ const submitToOData = async ({ responses, formId }) => {
                             style={[styles.input, { height: 80 }]}
                             multiline={true}
                             value={val}
-                            placeholder={q.placeholder || ""}     
+                            placeholder={q.placeholder || ""}
                             onChangeText={(t) =>
                               handleChange(section.id, q.id, t)
                             }
@@ -370,9 +418,7 @@ const submitToOData = async ({ responses, formId }) => {
                               style={styles.input}
                             >
                               <Text>
-                                {val
-                                  ? val
-                                  : "Select date (YYYY-MM-DD)"}
+                                {val ? val : "Select date (YYYY-MM-DD)"}
                               </Text>
                             </TouchableOpacity>
                             {showDatePicker[pickerKey] && (
@@ -406,11 +452,7 @@ const submitToOData = async ({ responses, formId }) => {
                               }
                               style={styles.input}
                             >
-                              <Text>
-                                {val
-                                  ? val
-                                  : "Select time (HH:MM)"}
-                              </Text>
+                              <Text>{val ? val : "Select time (HH:MM)"}</Text>
                             </TouchableOpacity>
                             {showTimePicker[pickerKey] && (
                               <DateTimePicker
@@ -497,7 +539,8 @@ const submitToOData = async ({ responses, formId }) => {
                                     <Text
                                       style={[
                                         styles.checkboxLabel,
-                                        arr.includes(opt) && styles.selectedCheckbox,
+                                        arr.includes(opt) &&
+                                          styles.selectedCheckbox,
                                       ]}
                                     >
                                       {arr.includes(opt) ? "[x]" : "[ ]"} {opt}
@@ -545,7 +588,8 @@ const submitToOData = async ({ responses, formId }) => {
         {submitted && (
           <View style={styles.successBox}>
             <Text style={styles.successText}>
-              Form submitted! Your responses have been {isOffline ? "saved locally." : "recorded."}
+              Form submitted! Your responses have been{" "}
+              {isOffline ? "saved locally." : "recorded."}
             </Text>
           </View>
         )}
