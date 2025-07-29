@@ -317,6 +317,7 @@ const submitToOData = async ({ responses, formId }) => {
                           <TextInput
                             style={styles.input}
                             value={val}
+                            placeholder={q.placeholder || ""}
                             onChangeText={(t) =>
                               handleChange(section.id, q.id, t)
                             }
@@ -328,6 +329,7 @@ const submitToOData = async ({ responses, formId }) => {
                             style={[styles.input, { height: 80 }]}
                             multiline={true}
                             value={val}
+                            placeholder={q.placeholder || ""}     
                             onChangeText={(t) =>
                               handleChange(section.id, q.id, t)
                             }
