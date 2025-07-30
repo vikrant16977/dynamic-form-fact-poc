@@ -1,5 +1,5 @@
 import React from "react";
-import { Menu, Image, Icon } from "semantic-ui-react";
+import { Menu, Image, Icon ,Button} from "semantic-ui-react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "./images/socal-gas.png";
 
@@ -51,11 +51,9 @@ const HeaderBar = () => {
             <span style={{ color: "white" }}>User</span>
           </Menu.Item>
           <Menu.Item>
-            <Icon
-              name="question circle outline"
-              style={{ color: "white", marginRight: 4 }}
-            />
-            <span style={{ color: "white" }}>Help</span>
+            <Button as={Link} to="/submitted-forms" color="blue">
+              View Submitted Forms
+            </Button>
           </Menu.Item>
           <Menu.Item>
             <div
