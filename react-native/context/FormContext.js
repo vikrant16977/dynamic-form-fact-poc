@@ -50,9 +50,11 @@ export const FormProvider = ({ children }) => {
           }
 
           if (Array.isArray(parsedSchema)) {
-            formsFetched.push(...parsedSchema);
+            parsedSchema.forEach((form) => {
+              formsFetched.push({ ...form, id: item.ID });
+            });
           } else {
-            formsFetched.push(parsedSchema);
+            formsFetched.push({ ...parsedSchema, id: item.ID });
           }
         } catch (e) {
           console.error("Failed to parse form schema for item:", item);

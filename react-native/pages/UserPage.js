@@ -232,7 +232,7 @@ const UserPage = () => {
 
   const submitToOData = async ({ responses, formId }) => {
     const payload = {
-      ID: Math.floor(Math.random() * 10000), // or use a UUID if needed
+      ID: selectedFormId, // or use a UUID if needed
       form_ID_ID: selectedFormId,
       submission: JSON.stringify(responses),
     };
