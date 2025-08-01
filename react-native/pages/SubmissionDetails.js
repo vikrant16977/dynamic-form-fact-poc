@@ -1,33 +1,35 @@
-
 import React from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
-
 const SubmissionDetail = ({ route }) => {
-  const { submission, formStructure } = route.params;
+  const { submission } = route.params;
+
+  let parsedSubmission = {};
+  try {
+    parsedSubmission = JSON.parse(submission.submission);
+  } catch (e) {
+    console.error("Failed to parse submission:", e);
+  }
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>{submission.formTitle || "Submitted Form"}</Text>
-      {formStructure?.sections?.map((section) => (
-        <View key={section.id} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.sectionTitle}</Text>
-          {section.questions.map((q) => {
-            const sectionResp = submission.responses?.[section.id] || {};
-            const val = sectionResp[q.id];
-            return (
-              <View key={q.id} style={styles.questionContainer}>
-                <Text style={styles.label}>{q.label}</Text>
-                <Text style={styles.answer}>
-                  {Array.isArray(val) ? val.join(", ") : val || "—"}
-                </Text>
-              </View>
-            );
-          })}
+      {Object.entries(parsedSubmission).map(([sectionTitle, questions]) => (
+        <View key={sectionTitle} style={styles.section}>
+          <Text style={styles.sectionTitle}>{sectionTitle}</Text>
+          {Object.entries(questions).map(([questionLabel, answer]) => (
+            <View key={questionLabel} style={styles.questionContainer}>
+              <Text style={styles.label}>{questionLabel}</Text>
+              <Text style={styles.answer}>
+                {Array.isArray(answer) ? answer.join(", ") : answer || "—"}
+              </Text>
+            </View>
+          ))}
         </View>
       ))}
     </ScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#fff" },

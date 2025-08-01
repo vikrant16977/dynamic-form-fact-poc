@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useContext } from "react";
 import {
   View,
@@ -29,7 +28,7 @@ const MySubmissions = () => {
   };
 
   const renderItem = ({ item }) => {
-    const formStructure = getFormStructureById(item.formId);
+    const formStructure = getFormStructureById(item.ID || item.form_ID_ID);
     return (
       <TouchableOpacity
         style={styles.item}

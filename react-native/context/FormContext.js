@@ -76,7 +76,7 @@ export const FormProvider = ({ children }) => {
 
     intervalRef.current = setInterval(() => {
       fetchForms();
-    }, 60000);
+    }, 240000);
 
     return () => {
       if (intervalRef.current) {

@@ -230,63 +230,73 @@ const UserPage = () => {
     }
   };
 
-  const submitToOData = async ({ responses, formId }) => {
-    const payload = {
-      ID: selectedFormId, // or use a UUID if needed
-      form_ID_ID: selectedFormId,
-      submission: JSON.stringify(responses),
+ const submitToOData = async ({ responses, formId }) => {
+  const structuredAnswers = {};
+
+  selectedForm.sections.forEach((section) => {
+    const sectionTitle = section.sectionTitle;
+    const sectionResponses = responses[section.id] || {};
+    const sectionAnswers = {};
+
+    section.questions.forEach((question) => {
+      const questionLabel = question.label;
+      const answer = sectionResponses[question.id];
+      if (answer !== undefined) {
+        sectionAnswers[questionLabel] = answer;
+      }
+    });
+
+    structuredAnswers[sectionTitle] = sectionAnswers;
+  });
+
+  const payload = {
+    ID: selectedFormId,
+    form_ID_ID: selectedFormId,
+    submission: JSON.stringify(structuredAnswers),
+  };
+
+  try {
+    const response = await fetch("https://fact-merge-c5s7.vercel.app/api/proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      Alert.alert("Success", "Form has been submitted successfully");
+    } else {
+      Alert.alert("Error", "Submission failed. Please try again.");
+    }
+
+    const submissionRecord = {
+      ...payload,
+      date: new Date().toISOString(),
+      formStructure: selectedForm,
     };
 
-    try {
-      const response = await fetch(
-        "https://fact-merge-c5s7.vercel.app/api/proxy",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+    const existing = await AsyncStorage.getItem("submitted_forms");
+    const all = existing ? JSON.parse(existing) : [];
+    all.push(submissionRecord);
+    await AsyncStorage.setItem("submitted_forms", JSON.stringify(all));
+  } catch (error) {
+    console.error("OData submission error:", error);
 
-      if (!response.ok)
-        Alert.alert("Success", "Form has been submitted successfully");
-      console.log("Submitted successfully:", payload);
+    const submissionRecord = {
+      ...payload,
+      date: new Date().toISOString(),
+      formStructure: selectedForm,
+    };
 
-const submission = {
-  formId: selectedFormId,
-  formTitle: selectedForm?.title,
-  responses,
-  date: new Date().toISOString(),
-  formStructure: selectedForm, // include full structure
+    const existing = await AsyncStorage.getItem("submitted_forms");
+    const all = existing ? JSON.parse(existing) : [];
+    all.push(submissionRecord);
+    await AsyncStorage.setItem("submitted_forms", JSON.stringify(all));
+  }
 };
 
-const existing = await AsyncStorage.getItem("submitted_forms");
-const all = existing ? JSON.parse(existing) : [];
-all.push(submission);
-await AsyncStorage.setItem("submitted_forms", JSON.stringify(all));
-
-
-      
-    } catch (error) {
-      console.error("OData submission error:", error);
-     
-const submission = {
-  formId: selectedFormId,
-  formTitle: selectedForm?.title,
-  responses,
-  date: new Date().toISOString(),
-  formStructure: selectedForm, // include full structure
-};
-
-const existing = await AsyncStorage.getItem("submitted_forms");
-const all = existing ? JSON.parse(existing) : [];
-all.push(submission);
-await AsyncStorage.setItem("submitted_forms", JSON.stringify(all));
-
-      //Alert.alert("Error", "Failed to submit form. Please try again.");
-    }
-  };
 
   const handleTimeChange = (event, selectedTime, sectionId, questionId) => {
     setShowTimePicker((prev) => ({
