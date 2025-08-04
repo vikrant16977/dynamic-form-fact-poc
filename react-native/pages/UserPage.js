@@ -251,7 +251,7 @@ const UserPage = () => {
 
   const payload = {
     ID: selectedFormId,
-    form_ID_ID: selectedFormId,
+    form_ID_ID: Math.floor(Math.random() * 10000),
     submission: JSON.stringify(structuredAnswers),
   };
 

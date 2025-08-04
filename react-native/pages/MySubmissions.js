@@ -39,7 +39,7 @@ const MySubmissions = () => {
           })
         }
       >
-        <Text style={styles.title}>{item.formTitle || "Untitled Form"}</Text>
+        <Text style={styles.title}>{item?.formStructure?.title || "Untitled Form"}</Text>
         <Text>{new Date(item.date).toLocaleString()}</Text>
       </TouchableOpacity>
     );
