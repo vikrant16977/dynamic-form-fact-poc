@@ -50,11 +50,10 @@ const HeaderBar = () => {
             <Icon name="user icon" style={{ color: "white", marginRight: 4 }} />
             <span style={{ color: "white" }}>User</span>
           </Menu.Item>
-          <Menu.Item>
-            <Button as={Link} to="/submitted-forms" color="blue">
-              View Submitted Forms
-            </Button>
-          </Menu.Item>
+          <Menu.Item as={Link} to="/submitted-forms" >
+            <Icon name="file icon" style={{ color: "white", marginRight: 4 }} />
+            <span style={{ color: "white" }}>View Submitted Forms</span>
+          </Menu.Item>   
           <Menu.Item>
             <div
               style={{
